@@ -16,15 +16,19 @@
         <div class="product-info">
             <h1>{{ product }}</h1>
             <p v-if="inStock">In stock</p>
-            <p v-else>Out of Stock</p>
+            <p v-else-if="inventory <= 10 && inventory > 0">Almost sold out!</p>
+            <p v-else v-bind:class="{ 'out-of-stock': !inStock }">Out of stock</p>
             <ul>
               <li v-for="detail in details">{{ detail }}</li>
            </ul>
-           <div class="soks_color-picker" v-for="variant in variants" :key="variant.variantId">
-            <p class="color_name" @mouseover="updateProduct(variant.variantImage)">
-                {{ variant.variantColor }}
-            </p>
-         </div>
+           <div
+            class="color-box"
+            v-for="variant in variants"
+            :key="variant.variantId"
+            :style="{ backgroundColor:variant.variantColor }"
+            @mouseover="updateProduct(variant.variantImage)">
+          </div>
+    
          <div class="sizes_container" v-for="size in sizes">
           <p>{{ size }}</p>
        </div>
@@ -32,7 +36,14 @@
         <p>Cart({{ cart }})</p>
       </div>
       <div class="cart_buttons">
-      <button class="cart_button" v-on:click="addToCart">Add to cart</button>
+        <button
+        v-on:click="addToCart"
+        :disabled="!inStock"
+        :class="{ disabledButton: !inStock }"
+ >
+    Add to cart
+ </button>
+ 
       <button class="cart_button" v-on:click="removeFromCart">Remove from cart</button>
     </div>
         </div>

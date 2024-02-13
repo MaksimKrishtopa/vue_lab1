@@ -4,7 +4,7 @@ let app = new Vue({
         product: "Socks",
         image: "./assets/vmSocks-green-onWhite.jpg",
         altText: "A pair of socks",
-        inStock: true,
+        inStock: false,
         inventory: 100,
         details: ['80% cotton', '20% polyester', 'Gender-neutral'],
         variants: [
@@ -27,10 +27,12 @@ let app = new Vue({
     methods: {
         addToCart() {
             this.cart += 1
+            this.inventory -= 1
         },
 
         removeFromCart() {
             this.cart -= 1
+            this.inventory += 1
         },
 
         updateProduct(variantImage) {
