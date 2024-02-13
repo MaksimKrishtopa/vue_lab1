@@ -1,33 +1,83 @@
-let app = new Vue({
-    el: '#app',
-    data: {
-        product: "Socks",
-        brand: 'Vue Mastery',
-        selectedVariant: 0,
-        onSale: true,
-        altText: "A pair of socks",
-        inventory: 100,
-        details: ['80% cotton', '20% polyester', 'Gender-neutral'],
-        variants: [
-            {
-                variantId: 2234,
-                variantColor: 'green',
-                variantImage: "./assets/vmSocks-green-onWhite.jpg",
-                variantQuantity: 10
-            },
-            {
-                variantId: 2235,
-                variantColor: 'blue',
-                variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                variantQuantity: 0
-            }
-         ],
-         
-        
-        sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
-        cart: 0, 
-         
+
+ 
+ Vue.component ('product', {
+    props: {
+        premium: {
+            type: Boolean,
+            required: true
+        }
     },
+ 
+    template: `
+        <div class="product">
+        <div class="product-image">
+            <img :src="image" :alt="altText"/>
+        </div>
+        <div class="product-info">
+            <h1>{{ title }}</h1>
+            <p v-if="inStock">In stock</p>
+            <p v-else v-bind:class="{ 'out-of-stock': !inStock }">Out of stock</p>
+            <product-details :details="details"></product-details>
+            <p>Shipping: {{ shipping }}</p>
+        <p>{{ sale }}</p>
+        <div
+        class="color-box"
+        v-for="(variant, index) in variants"
+        :key="variant.variantId"
+        :style="{ backgroundColor:variant.variantColor }"
+        @mouseover="updateProduct(index)"></div>
+
+        <div class="sizes_container" v-for="size in sizes">
+        <p>{{ size }}</p>
+    </div>
+    <div class="cart">
+        <p>Cart({{ cart }})</p>
+    </div>
+    <div class="cart_buttons">
+        <button
+        v-on:click="addToCart"
+        :disabled="!inStock"
+        :class="{ disabledButton: !inStock }">
+    Add to cart
+    </button>
+
+    <button class="cart_button" v-on:click="removeFromCart">Remove from cart</button>
+    </div>
+        </div>
+    </div>
+  `,
+
+    data() {
+        return {
+            product: "Socks",
+            brand: 'Vue Mastery',
+            selectedVariant: 0,
+            onSale: true,
+            altText: "A pair of socks",
+            inventory: 100,
+            details: ['80% cotton', '20% polyester', 'Gender-neutral'],
+            variants: [
+                {
+                    variantId: 2234,
+                    variantColor: 'green',
+                    variantImage: "./assets/vmSocks-green-onWhite.jpg",
+                    variantQuantity: 10
+                },
+                {
+                    variantId: 2235,
+                    variantColor: 'blue',
+                    variantImage: "./assets/vmSocks-blue-onWhite.jpg",
+                    variantQuantity: 0
+                }
+            ],
+            
+            
+            sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+            cart: 0, 
+            
+        }
+    },
+
     methods: {
         addToCart() {
             this.cart += 1
@@ -42,9 +92,7 @@ let app = new Vue({
         updateProduct(index) {
             this.selectedVariant = index;
         },
-
-
-     },
+    },
 
     computed: {
         title() {
@@ -65,10 +113,45 @@ let app = new Vue({
             } else {
                 return this.title + ' is not on sale.';
             }
-        }
+        },
+
+        shipping() {
+            if (this.premium) {
+                return "Free";
+            } else {
+                return 2.99
+            }
+         }
          
- 
-     },
-     
+    }
+
+
  })
+
+
+ Vue.component('product-details', {
+    props: {
+      details: {
+        type: Array,
+        required: true
+      }
+    },
+    template: `
+      <div>
+        <ul>
+          <li v-for="detail in details">{{ detail }}</li>
+        </ul>
+      </div>
+    `
+  });
+
+
+ let app = new Vue({
+    el: '#app',
+    data: {
+        premium: true
+    }
+ })
+ 
+ 
  
