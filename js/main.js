@@ -1,4 +1,4 @@
-
+let eventBus = new Vue()
  
 Vue.component('product', {
     props: {
@@ -17,8 +17,6 @@ Vue.component('product', {
             <h1>{{ title }}</h1>
             <p v-if="inStock">In stock</p>
             <p v-else v-bind:class="{ 'out-of-stock': !inStock }">Out of stock</p>
-            <product-details :details="details"></product-details>
-            <p>Shipping: {{ shipping }}</p>
             <p>{{ sale }}</p>
             <div class="color-box"
                  v-for="(variant, index) in variants"
@@ -32,19 +30,8 @@ Vue.component('product', {
             <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
             <button v-on:click="removeFromCart">Remove from cart</button>
             </div>
-            <div>
-            <h2>Reviews</h2>
-            <p v-if="!reviews.length">There are no reviews yet.</p>
-            <ul>
-            <li v-for="review in reviews">
-            <p>{{ review.name }}</p>
-            <p>Rating: {{ review.rating }}</p>
-            <p>{{ review.review }}</p>
-            </li>
-            </ul>
-            </div>
-
-            <product-review @review-submitted="addReview"></product-review>
+           
+            <product-tabs :reviews="reviews" :details="details" :shipping="shipping"></product-tabs>
         
         </div>
   `,
@@ -81,10 +68,7 @@ Vue.component('product', {
 
     methods: {
 
-        addReview(productReview) {
-            this.reviews.push(productReview)
-        },
-         
+
         addToCart() {
             this.$emit('add-to-cart',
             this.variants[this.selectedVariant].variantId);
@@ -100,6 +84,15 @@ Vue.component('product', {
             this.selectedVariant = index;
         },
     },
+
+            mounted() {
+            eventBus.$on('review-submitted', productReview => {
+                this.reviews.push(productReview)
+            })
+        },
+
+
+     
 
     computed: {
         title() {
@@ -210,7 +203,7 @@ Vue.component('product', {
                     rating: this.rating,
                     recommend: this.recommend
                 }
-                this.$emit('review-submitted', productReview)
+                eventBus.$emit('review-submitted', productReview)
                 this.name = null
                 this.review = null
                 this.rating = null
@@ -227,6 +220,72 @@ Vue.component('product', {
      
  
  })
+
+
+ Vue.component('product-tabs', {
+    props: {
+      reviews: {
+        type: Array,
+        required: false
+      },
+      details: {
+        type: Array,
+        required: true
+      },
+      shipping: {
+        type: String,
+        required: true
+      }
+    },
+    template: `
+      <div>
+        <ul>
+          <span
+            class="tab"
+            :class="{ activeTab: selectedTab === tab }"
+            v-for="(tab, index) in tabs"
+            @click="selectedTab = tab"
+          >{{ tab }}</span>
+        </ul>
+        <div v-show="selectedTab === 'Reviews'">
+          <p v-if="!reviews.length">There are no reviews yet.</p>
+          <ul>
+            <li v-for="review in reviews">
+              <p>{{ review.name }}</p>
+              <p>Rating: {{ review.rating }}</p>
+              <p>{{ review.review }}</p>
+            </li>
+          </ul>
+        </div>
+        <div v-show="selectedTab === 'Make a Review'">
+          <product-review @review-submitted="addReview"></product-review>
+        </div>
+        <div v-show="selectedTab === 'Shipping'">
+          <p>{{ shipping }}</p>
+        </div>
+        <div v-show="selectedTab === 'Details'">
+          <ul>
+            <li v-for="detail in details">{{ detail }}</li>
+          </ul>
+        </div>
+      </div>
+    `,
+    data() {
+      return {
+        tabs: ['Reviews', 'Make a Review', 'Shipping', 'Details'],
+        selectedTab: 'Reviews'
+      };
+    },
+    methods: {
+      addReview(productReview) {
+        this.$emit('review-submitted', productReview);
+      }
+    }
+  });
+  
+  
+ 
+ 
  
 
 
