@@ -123,3 +123,11 @@ button {
 .out-of-stock {
     text-decoration: line-through;
 }
+
+.recomend_block {
+    display: flex;
+}
+
+.recomend_block label {
+    padding-right: 75px;
+}
