@@ -1,13 +1,13 @@
 
  
- Vue.component ('product', {
+Vue.component('product', {
     props: {
         premium: {
             type: Boolean,
             required: true
         }
     },
- 
+
     template: `
         <div class="product">
         <div class="product-image">
@@ -19,32 +19,20 @@
             <p v-else v-bind:class="{ 'out-of-stock': !inStock }">Out of stock</p>
             <product-details :details="details"></product-details>
             <p>Shipping: {{ shipping }}</p>
-        <p>{{ sale }}</p>
-        <div
-        class="color-box"
-        v-for="(variant, index) in variants"
-        :key="variant.variantId"
-        :style="{ backgroundColor:variant.variantColor }"
-        @mouseover="updateProduct(index)"></div>
+            <p>{{ sale }}</p>
+            <div class="color-box"
+                 v-for="(variant, index) in variants"
+                 :key="variant.variantId"
+                 :style="{ backgroundColor:variant.variantColor }"
+                 @mouseover="updateProduct(index)"></div>
 
-        <div class="sizes_container" v-for="size in sizes">
-        <p>{{ size }}</p>
-    </div>
-    <div class="cart">
-        <p>Cart({{ cart }})</p>
-    </div>
-    <div class="cart_buttons">
-        <button
-        v-on:click="addToCart"
-        :disabled="!inStock"
-        :class="{ disabledButton: !inStock }">
-    Add to cart
-    </button>
-
-    <button class="cart_button" v-on:click="removeFromCart">Remove from cart</button>
-    </div>
+            <div class="sizes_container" v-for="size in sizes">
+                <p>{{ size }}</p>
+            </div>
+            <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
+            <button v-on:click="removeFromCart">Remove from cart</button>
         </div>
-    </div>
+        </div>
   `,
 
     data() {
@@ -70,23 +58,22 @@
                     variantQuantity: 0
                 }
             ],
-            
-            
+
             sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
-            cart: 0, 
-            
+            cart: [],
         }
     },
 
     methods: {
         addToCart() {
-            this.cart += 1
-            this.inventory -= 1
+            this.$emit('add-to-cart',
+            this.variants[this.selectedVariant].variantId);
+            
         },
 
         removeFromCart() {
-            this.cart -= 1
-            this.inventory += 1
+            const selectedVariantId = this.variants[this.selectedVariant].variantId;
+            this.$emit('remove-from-cart', selectedVariantId);
         },
 
         updateProduct(index) {
@@ -103,7 +90,7 @@
             return this.variants[this.selectedVariant].variantImage;
         },
 
-        inStock(){
+        inStock() {
             return this.variants[this.selectedVariant].variantQuantity
         },
 
@@ -116,17 +103,10 @@
         },
 
         shipping() {
-            if (this.premium) {
-                return "Free";
-            } else {
-                return 2.99
-            }
-         }
-         
+            return this.premium ? "Free" : 2.99;
+        }
     }
-
-
- })
+});
 
 
  Vue.component('product-details', {
@@ -146,12 +126,29 @@
   });
 
 
- let app = new Vue({
+  let app = new Vue({
     el: '#app',
     data: {
-        premium: true
+        premium: true,
+        cart: []
+    },
+    methods: {
+        updateCart(id) {
+            this.cart.push(id);
+        },
+     
+
+        removeFromCart(productId) {
+            const productIndex = this.cart.indexOf(productId);
+
+            if (productIndex !== -1) {
+
+                this.cart.splice(productIndex, 1);
+            }
+        },
     }
- })
+});
+
  
  
  
