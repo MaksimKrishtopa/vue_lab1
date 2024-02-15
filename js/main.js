@@ -19,15 +19,16 @@ Vue.component('product', {
             <p v-else v-bind:class="{ 'out-of-stock': !inStock }">Out of stock</p>
             <p>{{ sale }}</p>
             <div class="color-box"
-                 v-for="(variant, index) in variants"
-                 :key="variant.variantId"
-                 :style="{ backgroundColor:variant.variantColor }"
-                 @mouseover="updateProduct(index)"></div>
+            v-for="(variant, index) in variants"
+            :key="variant.variantId"
+            :style="{ backgroundColor: variant.variantColor, border: index === selectedColor ? '3px solid gray' : 'none' }"
+            @click="updateColor(index)"></div>
 
-            <div class="sizes_container" v-for="size in sizes">
-                <p>{{ size }}</p>
+            <div class="sizes_container" v-for="(size, index) in sizes" :key="index" @click="updateSize(index)">
+            <p :class="{ selectedSize: index === selectedSize }">{{ size }}</p>
             </div>
-            <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
+            
+            <button class="addToCartBtn" v-on:click="addToCart" :disabled="!inStock || selectedColor === null || selectedSize === null" :class="{ disabledButton: !inStock || selectedColor === null || selectedSize === null }">ADD TO CART</button>
             <button v-on:click="removeFromCart">Remove from cart</button>
             </div>
            
@@ -50,19 +51,21 @@ Vue.component('product', {
                     variantId: 2234,
                     variantColor: 'green',
                     variantImage: "./assets/vmSocks-green-onWhite.jpg",
-                    variantQuantity: 10
+                    variantQuantity: 100
                 },
                 {
                     variantId: 2235,
                     variantColor: 'blue',
                     variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                    variantQuantity: 0
+                    variantQuantity: 100
                 }
             ],
 
             sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
             cart: [],
             reviews: [],
+            selectedColor: null,
+            selectedSize: null,
         }
     },
 
@@ -80,8 +83,24 @@ Vue.component('product', {
             this.$emit('remove-from-cart', selectedVariantId);
         },
 
-        updateProduct(index) {
-            this.selectedVariant = index;
+        updateColor(index) {
+          if (this.selectedColor === index) {
+              
+              this.selectedColor = null;
+
+          } else {
+              this.selectedColor = index;
+
+          }
+      },
+  
+        updateSize(index) {
+            if (this.selectedSize === index) {
+                
+                this.selectedSize = null;
+            } else {
+                this.selectedSize = index;
+            }
         },
     },
 
@@ -100,12 +119,11 @@ Vue.component('product', {
         },
 
         image() {
-            return this.variants[this.selectedVariant].variantImage;
-        },
-
-        inStock() {
-            return this.variants[this.selectedVariant].variantQuantity
-        },
+          return this.selectedColor !== null ? this.variants[this.selectedColor].variantImage : this.variants[this.selectedVariant].variantImage;
+      },
+      inStock() {
+          return this.selectedColor !== null ? this.variants[this.selectedColor].variantQuantity > 0 : this.variants[this.selectedVariant].variantQuantity > 0;
+      },
 
         sale() {
             if (this.onSale) {
